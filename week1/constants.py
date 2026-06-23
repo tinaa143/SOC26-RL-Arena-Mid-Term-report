@@ -1,0 +1,5 @@
+ROWS = 3
+COLS = 10
+PLAYER = "P"
+OBSTACLE = "X"
+EMPTY = "."
