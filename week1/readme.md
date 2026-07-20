@@ -1,7 +1,7 @@
 # Week 1 — Python Fundamentals & Grid Simulation
 
 ## Overview
-Week 1 focused on building the foundational Python skills needed for the rest of the project — classes, modules, and basic terminal I/O - by implementing a simple grid-based simulation from scratch. The goal was a 3×10 board where a player moves under keyboard input, respecting boundaries and obstacles. This is the base layer every later week (Pygame rendering, territory capture, RL environments) builds on top of.
+Week 1 focused on building the foundational Python skills needed for the rest of the project, classes, modules, and basic terminal I/O - by implementing a simple grid-based simulation from scratch. The goal was a 3×10 board where a player moves under keyboard input, respecting boundaries and obstacles. This is the base layer every later week (Pygame rendering, territory capture, RL environments) builds on top of.
 
 ## Topics Covered
 - Representing a 2D grid as a list of lists in Python
