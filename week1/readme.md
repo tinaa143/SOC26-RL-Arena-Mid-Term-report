@@ -26,7 +26,7 @@ Build a simple grid-based simulation where a player moves inside a 2D board:
 
 ## Reflection Questions
 **1. Why separate `constants.py`, `utils.py`, and `main.py` instead of one file?**
-It keeps configuration (grid size, symbols) independent of logic (movement, rendering) and independent of the control flow (the game loop). This makes Week 2 easy — the constants and movement logic can be swapped for a Pygame version without rewriting everything.
+It keeps configuration (grid size, symbols) independent of logic (movement, rendering) and independent of the control flow (the game loop). This makes Week 2 easy, the constants and movement logic can be swapped for a Pygame version without rewriting everything.
 
 **2. What's the difference between "out of bounds" and "blocked by obstacle" in the code?**
 Both must be checked before actually moving the player. Out-of-bounds is a check on the *new* row/column against grid dimensions; obstacle-blocking is a check on the *content* of the target cell. Both must fail closed - the player's position only updates if neither check trips.
