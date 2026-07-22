@@ -43,7 +43,7 @@ python3 main.py
   checked explicitly, and a straight positional swap is caught because each player's
   head is written into the grid, so `grid[next_pos] != 0` trips for both.
 - **Collision checks use the numpy grid** (`self.grid[next_pos] != 0`) rather than
-  `next_pos in player.trail` — O(1) instead of O(trail length), which matters once
+  `next_pos in player.trail`, O(1) instead of O(trail length), which matters once
   trails reach thousands of cells.
 - **Coordinate convention:** positions are `(row, col)` and directions are
   `(Δrow, Δcol)` throughout, matching `grid[row][col]`.
