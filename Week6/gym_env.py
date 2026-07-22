@@ -15,10 +15,11 @@ ENEMY_TRAIL_LENGTH = 5
 ACTIONS = [(-1, 0), (0, 1), (1, 0), (0, -1)]      # up, right, down, left
 
 # Reward values - these are the numbers to experiment with.
-STEP_PENALTY = -0.01       # small cost per step, so standing still is not free
-DIFF_SCALE = 0.2           # reward per unit change in (my cells - enemy cells)
+STEP_PENALTY = -0.02       # small cost per step, so standing still is not free
+OFF_TERRITORY_PENALTY = -0.03   # extra cost per step spent outside your land
+DIFF_SCALE = 1.0           # reward per unit change in (my cells - enemy cells)
 KILL_REWARD = 10.0         # touching the enemy trail
-DEATH_PENALTY = -10.0      # touching your own trail
+DEATH_PENALTY = -3.0       # touching your own trail, or leaving the grid
 WIN_BONUS = 5.0            # more territory than the enemy when time runs out
 LOSS_PENALTY = -5.0        # less territory than the enemy when time runs out
 
@@ -103,7 +104,7 @@ class RL_Arena_Env(gym.Env):
         self._steps = 0
         self._prev_diff = 0
 
-    # setup 
+    # -- setup ------------------------------------------------------------
 
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
@@ -185,7 +186,7 @@ class RL_Arena_Env(gym.Env):
                 cell = (cell[0] + direction[0], cell[1] + direction[1])
             return
 
-    # stepping 
+    # -- stepping ---------------------------------------------------------
 
     def step(self, action):
         self._steps += 1
@@ -199,8 +200,11 @@ class RL_Arena_Env(gym.Env):
         blocked = False
 
         if not self._inside(next_pos):
-            # The grid edge blocks the agent, it does not kill it.
-            blocked = True
+            # Leaving the grid kills the agent. If the edge merely blocked it,
+            # a wall would be a permanently safe square and the best policy
+            # would be to walk into one and park there for the whole episode.
+            reward += DEATH_PENALTY
+            return self._get_obs(), reward, True, False, {"result": "dead"}
         else:
             next_cell = self.grid[next_pos]
 
@@ -235,6 +239,10 @@ class RL_Arena_Env(gym.Env):
             else:
                 self.on_territory = False
 
+        # Time spent outside your own territory is time spent exposed.
+        if not self.on_territory:
+            reward += OFF_TERRITORY_PENALTY
+
         # Reward the CHANGE in the territory gap, so growing your own area only
         # counts insofar as it puts you ahead of the enemy.
         diff = self._territory_diff()
@@ -263,37 +271,11 @@ class RL_Arena_Env(gym.Env):
         row, col = pos
         return 0 <= row < self.grid_size and 0 <= col < self.grid_size
 
-    # observation
+    # -- observation ------------------------------------------------------
 
     def _get_obs(self):
         obs = np.zeros((self.grid_size, self.grid_size, 3), dtype=np.float32)
 
         # Channel 0 - your own stuff.
         obs[:, :, 0][self.grid == AGENT] = 1.0
-        obs[:, :, 0][self.grid == -AGENT] = 0.5
-
-        # Channel 1 - enemy territory, which blocks you.
-        obs[:, :, 1][self.grid == ENEMY] = 1.0
-
-        # Channel 2 - enemy trail, which is killable, plus your own head.
-        obs[:, :, 2][self.grid == -ENEMY] = 1.0
-        obs[:, :, 2][self.agent_pos] = 0.5
-
-        return obs
-
-    # rendering 
-
-    def render(self):
-        return self._render_rgb()
-
-    def _render_rgb(self):
-        rgb = np.zeros((self.grid_size, self.grid_size, 3), dtype=np.uint8)
-
-        rgb[self.grid == 0] = COLOR_EMPTY
-        rgb[self.grid == AGENT] = COLOR_AGENT_TERRITORY
-        rgb[self.grid == -AGENT] = COLOR_AGENT_TRAIL
-        rgb[self.grid == ENEMY] = COLOR_ENEMY_TERRITORY
-        rgb[self.grid == -ENEMY] = COLOR_ENEMY_TRAIL
-        rgb[self.agent_pos] = COLOR_AGENT_HEAD
-
-        return rgb
+        obs[:, :, 0]
