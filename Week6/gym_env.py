@@ -104,7 +104,7 @@ class RL_Arena_Env(gym.Env):
         self._steps = 0
         self._prev_diff = 0
 
-    # -- setup ------------------------------------------------------------
+    # setup 
 
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
@@ -186,7 +186,7 @@ class RL_Arena_Env(gym.Env):
                 cell = (cell[0] + direction[0], cell[1] + direction[1])
             return
 
-    # -- stepping ---------------------------------------------------------
+    # stepping 
 
     def step(self, action):
         self._steps += 1
@@ -271,11 +271,37 @@ class RL_Arena_Env(gym.Env):
         row, col = pos
         return 0 <= row < self.grid_size and 0 <= col < self.grid_size
 
-    # -- observation ------------------------------------------------------
+    # observation 
 
     def _get_obs(self):
         obs = np.zeros((self.grid_size, self.grid_size, 3), dtype=np.float32)
 
         # Channel 0 - your own stuff.
         obs[:, :, 0][self.grid == AGENT] = 1.0
-        obs[:, :, 0]
+        obs[:, :, 0][self.grid == -AGENT] = 0.5
+
+        # Channel 1 - enemy territory, which blocks you.
+        obs[:, :, 1][self.grid == ENEMY] = 1.0
+
+        # Channel 2 - enemy trail, which is killable, plus your own head.
+        obs[:, :, 2][self.grid == -ENEMY] = 1.0
+        obs[:, :, 2][self.agent_pos] = 0.5
+
+        return obs
+
+    # rendering 
+
+    def render(self):
+        return self._render_rgb()
+
+    def _render_rgb(self):
+        rgb = np.zeros((self.grid_size, self.grid_size, 3), dtype=np.uint8)
+
+        rgb[self.grid == 0] = COLOR_EMPTY
+        rgb[self.grid == AGENT] = COLOR_AGENT_TERRITORY
+        rgb[self.grid == -AGENT] = COLOR_AGENT_TRAIL
+        rgb[self.grid == ENEMY] = COLOR_ENEMY_TERRITORY
+        rgb[self.grid == -ENEMY] = COLOR_ENEMY_TRAIL
+        rgb[self.agent_pos] = COLOR_AGENT_HEAD
+
+        return rgb
