@@ -1,6 +1,14 @@
 
 from constants import *
 
+def clear_screen():
+    print("\n" * 40)
+
+
+def print_grid(grid):
+    for row in grid:
+        print(" ".join(row))
+
 def display_grid(grid):
     for row in grid:
         for cell in row:
