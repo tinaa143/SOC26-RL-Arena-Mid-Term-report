@@ -1,4 +1,0 @@
-numpy
-gymnasium
-stable-baselines3
-pygame
